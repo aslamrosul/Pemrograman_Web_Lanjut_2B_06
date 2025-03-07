@@ -11,7 +11,7 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="{{ asset('adminlte/plugins/fontawesome-free/css/all.min.css')}}">
   <!-- Theme style -->
-  <link rel="stylesheet" href="{{ assets('adminlte/dist/css/adminlte.min.css')}}">
+  <link rel="stylesheet" href="{{ asset('adminlte/dist/css/adminlte.min.css')}}">
 
 </head>
 <body class="hold-transition sidebar-mini">
@@ -42,6 +42,7 @@
     <!-- Main content -->
     <section class="content">
 @yield('content')
+
     </section>
     <!-- /.content -->
   </div>
