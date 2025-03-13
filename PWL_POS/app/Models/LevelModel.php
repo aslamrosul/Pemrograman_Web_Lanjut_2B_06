@@ -9,14 +9,14 @@ class LevelModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'm_level'; // Sesuaikan dengan nama tabel di database
-    protected $primaryKey = 'level_id'; // Sesuaikan dengan primary key tabel
-    public $timestamps = true; // Ubah menjadi true jika tabel memiliki created_at dan updated_at
+    protected $table = 'm_level'; 
+    protected $primaryKey = 'level_id';
 
-    protected $fillable = ['level_id', 'level_nama']; // Sesuaikan dengan kolom yang ada
+     /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
 
-    public function users()
-    {
-        return $this->hasMany(UserModel::class, 'level_id', 'level_id');
-    }
+     protected $fillable = ['level_kode', 'level_nama']; 
 }
