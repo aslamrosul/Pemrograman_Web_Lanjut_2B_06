@@ -64,7 +64,7 @@
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" name="barang_id[]" value="{{ $brg->barang_id }}" 
                             {{ in_array($brg->barang_id, $penjualan->details->pluck('barang_id')->toArray()) ? 'checked' : '' }}>
-                            <label class="form-check-label">{{ $brg->nama_barang }}</label>
+                            <label class="form-check-label">{{ $brg->barang_nama }}</label>
                         </div>
                     @endforeach
                     @error('barang_id')

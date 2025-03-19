@@ -6,6 +6,8 @@
             <h3 class="card-title">{{ $page->title }}</h3>
             <div class="card-tools">
                 <a class="btn btn-sm btn-primary mt-1" href="{{ url('level/create') }}">Tambah</a>
+                <button onclick="modalAction('{{ url('level/create_ajax') }}')" class="btn btn-sm btn-success mt-1">Tambah
+                    Ajax</button>
             </div>
         </div>
         <div class="card-body">
@@ -14,7 +16,7 @@
                     {{ session('error') }}
                 </div>
             @endif
-           
+
             @if(session('success'))
                 <div class="alert alert-success">
                     {{ session('success') }}
@@ -24,23 +26,31 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Kode level</th>
-                        <th>Nama level</th>
+                        <th>Kode Level</th>
+                        <th>Nama Level</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
             </table>
         </div>
     </div>
+    <div id="myModal" class="modal fade animate shake" tabindex="-1" role="dialog" databackdrop="static"
+        data-keyboard="false" data-width="75%" aria-hidden="true"></div>
 @endsection
 
 @push('css')
 @endpush
 
 @push('js')
-    <script>
+<script>
+    function modalAction(url = '') {
+        $('#myModal').load(url, function () {
+            $('#myModal').modal('show');
+        });
+    }
+    var dataLevel;
         $(document).ready(function () {
-            var datalevel = $('#table_level').DataTable({
+             dataLevel = $('#table_level').DataTable({
                 // serverSide: true, jika ingin menggunakan server side processing
                 serverSide: true,
                 ajax: {
@@ -75,6 +85,7 @@
                         searchable: false
                     },]
             });
+            
         });
     </script>
 @endpush

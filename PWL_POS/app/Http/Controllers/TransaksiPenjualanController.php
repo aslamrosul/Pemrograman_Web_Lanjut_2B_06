@@ -7,6 +7,7 @@ use App\Models\PenjualanModel;
 use App\Models\PenjualanDetailModel;
 use App\Models\BarangModel;
 use App\Models\UserModel;
+use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
 
 class TransaksiPenjualanController extends Controller
@@ -40,14 +41,23 @@ class TransaksiPenjualanController extends Controller
                 return $penjualan->user ? $penjualan->user->nama : '-';
             })
             ->addColumn('aksi', function ($penjualan) {
-                return '
-                    <a href="' . url('/penjualan/' . $penjualan->penjualan_id) . '" class="btn btn-info btn-sm">Detail</a>
-                    <a href="' . url('/penjualan/' . $penjualan->penjualan_id . '/edit') . '" class="btn btn-warning btn-sm">Edit</a>
-                    <form action="' . url('/penjualan/' . $penjualan->penjualan_id) . '" method="POST" class="d-inline-block">
-                        ' . csrf_field() . method_field('DELETE') . '
-                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm(\'Apakah Anda yakin ingin menghapus transaksi ini?\');">Hapus</button>
-                    </form>
-                ';
+                // return '
+                //     <a href="' . url('/penjualan/' . $penjualan->penjualan_id) . '" class="btn btn-info btn-sm">Detail</a>
+                //     <a href="' . url('/penjualan/' . $penjualan->penjualan_id . '/edit') . '" class="btn btn-warning btn-sm">Edit</a>
+                //     <form action="' . url('/penjualan/' . $penjualan->penjualan_id) . '" method="POST" class="d-inline-block">
+                //         ' . csrf_field() . method_field('DELETE') . '
+                //         <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm(\'Apakah Anda yakin ingin menghapus transaksi ini?\');">Hapus</button>
+                //     </form>
+                // ';
+
+                $btn = '<button onclick="modalAction(\'' . url('/penjualan/' . $penjualan->penjualan_id .
+                    '/show_ajax') . '\')" class="btn btn-info btn-sm">Detail</button> ';
+                $btn .= '<button onclick="modalAction(\'' . url('/penjualan/' . $penjualan->penjualan_id .
+                    '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
+                $btn .= '<button onclick="modalAction(\'' . url('/penjualan/' . $penjualan->penjualan_id .
+                    '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Hapus</button> ';
+
+                return $btn;
             })
             ->rawColumns(['aksi'])
             ->make(true);
@@ -208,5 +218,143 @@ class TransaksiPenjualanController extends Controller
         } catch (\Exception $e) {
             return redirect('/penjualan')->with('error', 'Terjadi kesalahan saat menghapus transaksi');
         }
+    }
+    public function create_ajax()
+    {
+        $kasir = UserModel::select('user_id', 'nama')->get();
+        $barang = BarangModel::select('barang_id', 'barang_nama', 'harga_jual')->get();
+
+        return view('penjualan.create_ajax', compact('kasir', 'barang'));
+    }
+
+    public function store_ajax(Request $request)
+    {
+        if ($request->ajax() || $request->wantsJson()) {
+            $rules = [
+                'user_id' => 'required|exists:m_user,user_id',
+                'pembeli' => 'required|string|max:100',
+                'penjualan_kode' => 'required|string|unique:t_penjualan,penjualan_kode',
+                'penjualan_tanggal' => 'required|date',
+                'barang_id' => 'required|array',
+                'barang_id.*' => 'exists:m_barang,barang_id',
+                'jumlah' => 'required|array',
+                'jumlah.*' => 'integer|min:1'
+            ];
+
+            $validator = Validator::make($request->all(), $rules);
+            
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Validasi Gagal',
+                    'msgField' => $validator->errors(),
+                ]);
+            }
+
+            $penjualan = PenjualanModel::create($request->only(['user_id', 'pembeli', 'penjualan_kode', 'penjualan_tanggal']));
+
+            foreach ($request->barang_id as $index => $barang_id) {
+                $barang = BarangModel::find($barang_id);
+                PenjualanDetailModel::create([
+                    'penjualan_id' => $penjualan->penjualan_id,
+                    'barang_id' => $barang_id,
+                    'jumlah' => $request->jumlah[$index],
+                    'harga' => $barang->harga_jual ?? 0
+                ]);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Transaksi berhasil disimpan'
+            ]);
+        }
+    }
+
+    public function edit_ajax(string $id)
+    {
+        $penjualan = PenjualanModel::with('details')->find($id);
+        $kasir = UserModel::select('user_id', 'nama')->get();
+        $barang = BarangModel::select('barang_id', 'barang_nama', 'harga_jual')->get();
+
+        return view('penjualan.edit_ajax', compact('penjualan', 'kasir', 'barang'));
+    }
+
+    public function update_ajax(Request $request, $id)
+    {
+        if ($request->ajax() || $request->wantsJson()) {
+            $rules = [
+                'user_id' => 'required|exists:m_user,user_id',
+                'pembeli' => 'required|string|max:100',
+                'penjualan_kode' => 'required|string|unique:t_penjualan,penjualan_kode,' . $id . ',penjualan_id',
+                'penjualan_tanggal' => 'required|date',
+                'barang_id' => 'required|array',
+                'barang_id.*' => 'exists:m_barang,barang_id',
+                'jumlah' => 'required|array',
+                'jumlah.*' => 'integer|min:1',
+                'harga' => 'required|array',
+                'harga.*' => 'integer|min:0',
+            ];
+
+            $validator = Validator::make($request->all(), $rules);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Validasi gagal.',
+                    'msgField' => $validator->errors()
+                ]);
+            }
+
+            $penjualan = PenjualanModel::findOrFail($id);
+            $penjualan->update($request->only(['user_id', 'pembeli', 'penjualan_kode', 'penjualan_tanggal']));
+
+            PenjualanDetailModel::where('penjualan_id', $id)->delete();
+            foreach ($request->barang_id as $index => $barang_id) {
+                PenjualanDetailModel::create([
+                    'penjualan_id' => $penjualan->penjualan_id,
+                    'barang_id' => $barang_id,
+                    'jumlah' => $request->jumlah[$index],
+                    'harga' => $request->harga[$index]
+                ]);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Transaksi berhasil diperbarui'
+            ]);
+        }
+    }
+
+    public function confirm_ajax(string $id)
+    {
+        $penjualan = PenjualanModel::find($id);
+
+        return view('penjualan.confirm_ajax', ['penjualan' => $penjualan]);
+    }
+
+    public function delete_ajax(Request $request, $id)
+    {
+        if ($request->ajax() || $request->wantsJson()) {
+            $penjualan = PenjualanModel::find($id);
+            if ($penjualan) {
+                PenjualanDetailModel::where('penjualan_id', $id)->delete();
+                $penjualan->delete();
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Transaksi berhasil dihapus'
+                ]);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Data tidak ditemukan'
+                ]);
+            }
+        }
+    }
+
+    public function show_ajax($id)
+    {
+        $penjualan = PenjualanModel::with(['user', 'details.barang'])->find($id);
+        return view('penjualan.show_ajax', compact('penjualan'));
     }
 }

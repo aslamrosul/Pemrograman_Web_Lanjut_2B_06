@@ -41,7 +41,7 @@
             <tbody>
                 @foreach($penjualan->details as $detail)
                 <tr>
-                    <td>{{ $detail->barang->nama_barang }}</td>
+                    <td>{{ $detail->barang->barang_nama }}</td>
                     <td>Rp {{ number_format($detail->barang->harga, 0, ',', '.') }}</td>
                     <td>{{ $detail->jumlah }}</td>
                     <td>Rp {{ number_format($detail->subtotal, 0, ',', '.') }}</td>

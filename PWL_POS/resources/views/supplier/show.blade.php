@@ -26,11 +26,12 @@
                     <th>Nama supplier</th>
                     <td>{{ $supplier->supplier_nama }}</td>
                 </tr>
-                
                 <tr>
-                    <th>Password</th>
-                    <td>********</td>
+                    <th>Alamat Supplier</th>
+                    <td>{{ $supplier->supplier_alamat }}</td>
                 </tr>
+                
+                
             </table>
             <a href="{{ url('supplier') }}" class="btn btn-sm btn-default mt-2">Kembali</a>
         @endempty
