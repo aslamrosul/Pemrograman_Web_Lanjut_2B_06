@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Login Pengguna</title>
-    
+
     <!-- Google Font: Source Sans Pro -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="{{ asset('adminlte/plugins/fontawesome-free/css/all.min.css') }}">
     <!-- icheck bootstrap -->
@@ -16,6 +20,7 @@
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('adminlte/dist/css/adminlte.min.css') }}">
 </head>
+
 <body class="hold-transition login-page">
     <div class="login-box">
         <div class="card card-outline card-primary">
@@ -36,7 +41,8 @@
                         <small id="error-username" class="error-text text-danger"></small>
                     </div>
                     <div class="input-group mb-3">
-                        <input type="password" id="password" name="password" class="form-control" placeholder="Password">
+                        <input type="password" id="password" name="password" class="form-control"
+                            placeholder="Password">
                         <div class="input-group-append">
                             <div class="input-group-text">
                                 <span class="fas fa-lock"></span>
@@ -59,7 +65,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- jQuery -->
     <script src="{{ asset('adminlte/plugins/jquery/jquery.min.js') }}"></script>
     <!-- Bootstrap 4 -->
@@ -71,62 +77,64 @@
     <script src="{{ asset('adminlte/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
     <!-- AdminLTE App -->
     <script src="{{ asset('adminlte/dist/js/adminlte.min.js') }}"></script>
-    
+
     <script>
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
-        
-        $(document).ready(function() {
+
+        $(document).ready(function () {
             $("#form-login").validate({
                 rules: {
                     username: { required: true, minlength: 4, maxlength: 20 },
                     password: { required: true, minlength: 6, maxlength: 20 }
                 },
-                submitHandler: function(form) {
+                submitHandler: function (form) {
                     $.ajax({
                         url: form.action,
                         type: form.method,
                         data: $(form).serialize(),
-                        success: function(response) {
+                        success: function (response) {
                             if (response.status) {
                                 Swal.fire({
                                     icon: 'success',
                                     title: 'Berhasil',
                                     text: response.message,
-                                }).then(function() {
+                                }).then(function () {
                                     window.location = response.redirect;
                                 });
                             } else {
                                 $('.error-text').text('');
-                                $.each(response.msgField, function(prefix, val) {
+                                $.each(response.msgField, function (prefix, val) {
                                     $('#error-' + prefix).text(val[0]);
                                 });
                                 Swal.fire({
                                     icon: 'error',
                                     title: 'Terjadi Kesalahan',
-                                    text: response.message
+                                    text: response.message || 'Terjadi kesalahan pada server',
                                 });
+
                             }
                         }
                     });
                     return false;
                 },
                 errorElement: 'span',
-                errorPlacement: function(error, element) {
+                errorPlacement: function (error, element) {
                     error.addClass('invalid-feedback');
                     element.closest('.input-group').append(error);
                 },
-                highlight: function(element) {
+                highlight: function (element) {
                     $(element).addClass('is-invalid');
                 },
-                unhighlight: function(element) {
+                unhighlight: function (element) {
                     $(element).removeClass('is-invalid');
                 }
             });
         });
     </script>
 </body>
+
 </html>
