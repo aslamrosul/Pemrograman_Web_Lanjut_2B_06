@@ -16,8 +16,13 @@ use PharIo\Manifest\Author;
 
 Route::pattern('id', '[0-9]+'); //jika ada parameter id, maka harus berupa angka
 
+// register
+Route::get('register', [AuthController::class, 'register'])->name('register');
+Route::post('register', [AuthController::class, 'postRegister']);
+// login
 Route::get('login', [AuthController::class, 'login'])->name('login');
 Route::post('login', [AuthController::class, 'postlogin']);
+//logout
 Route::get('logout', [AuthController::class, 'logout'])->middleware('auth');
 
 Route::middleware(['auth'])->group(function () { //artinya semua route di dalam goup ini harus login dulu

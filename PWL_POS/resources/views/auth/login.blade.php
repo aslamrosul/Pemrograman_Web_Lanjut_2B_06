@@ -62,6 +62,7 @@
                         </div>
                     </div>
                 </form>
+                <a href="{{ route('register') }}" class="text-center">Belum punya akun?</a>
             </div>
         </div>
     </div>
