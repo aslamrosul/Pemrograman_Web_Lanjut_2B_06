@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\KategoriModel;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\Validator;
@@ -390,4 +391,22 @@ class KategoriController extends Controller
          $writer->save('php://output'); //simpan file ke output
          exit; //keluar dari scriptA
      }
+
+     public function export_pdf(){
+        $kategori = KategoriModel::select(
+            'kategori_kode',
+            'kategori_nama'
+        )
+        ->orderBy('kategori_id')
+        ->orderBy('kategori_kode')
+        ->get();
+
+        // use Barryvdh\DomPDF\Facade\Pdf;
+        $pdf = PDF::loadView('kategori.export_pdf', ['kategori' => $kategori]);
+        $pdf->setPaper('A4', 'portrait'); // set ukuran kertas dan orientasi
+        $pdf->setOption("isRemoteEnabled", true); // set true jika ada gambar dari url
+        $pdf->render(); // render pdf
+
+        return $pdf->stream('Data Kategori Barang '.date('Y-m-d H-i-s').'.pdf');
+    }
 }
