@@ -118,6 +118,7 @@ Route::middleware(['auth'])->group(function () { //artinya semua route di dalam 
             Route::delete('/{id}', [BarangController::class, 'destroy']); // menghapus data Barang
             Route::get('/import', [BarangController::class, 'import']); // menampilkan halaman form import Barang
             Route::post('/import_ajax', [BarangController::class, 'import_ajax']); // menyimpan data Barang dari file import
+             Route::get('/export_excel', [BarangController::class,'export_excel']); 
         });
     });
 
