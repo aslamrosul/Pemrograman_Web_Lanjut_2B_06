@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class BarangController extends Controller
 {
@@ -23,7 +24,7 @@ class BarangController extends Controller
             'title' => 'Daftar barang yang terdaftar dalam sistem'
         ];
 
-        $activeMenu = 'barang'; // set menu yang sedang aktif
+        $activeMenu = 'barang'; // set menu yang sedang aZSktif
         
         // Mengambil semua kategori untuk dropdown
         //$kategori = KategoriModel::all();
@@ -50,9 +51,7 @@ class BarangController extends Controller
             'harga_jual')
             ->with('kategori');
 
-        //if ($request->kategori_id) {
-        //    $barang->where('kategori_id', $request->kategori_id);
-        //}
+      
         $kategori_id = $request->input('filter_kategori'); 
         if (!empty($kategori_id)) {
             $barang->where('kategori_id', $kategori_id);
@@ -456,4 +455,26 @@ public function import_ajax(Request $request)
         $writer->save('php://output'); //simpan file ke output
         exit; //keluar dari scriptA
     } // end function export_excel
+
+    public function export_pdf(){
+        $barang = BarangModel::select(
+            'kategori_id',
+            'barang_kode',
+            'barang_nama',
+            'harga_jual',
+            'harga_beli'
+        )
+        ->orderBy('kategori_id')
+        ->orderBy('barang_kode')
+        ->with('kategori')
+        ->get();
+
+        // use Barryvdh\DomPDF\Facade\Pdf;
+        $pdf = PDF::loadView('barang.export_pdf', ['barang' => $barang]);
+        $pdf->setPaper('A4', 'portrait'); // set ukuran kertas dan orientasi
+        $pdf->setOption("isRemoteEnabled", true); // set true jika ada gambar dari url
+        $pdf->render(); // render pdf
+
+        return $pdf->stream('Data Barang '.date('Y-m-d H-i-s').'.pdf');
+    }
 }
