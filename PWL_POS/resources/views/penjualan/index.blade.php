@@ -36,6 +36,7 @@
                     <th>Pembeli</th>
                     <th>Kasir</th> <!-- Tambahkan ini -->
                     <th>Tanggal</th>
+                    <th>Total Harga</th> 
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -60,19 +61,19 @@
 
         var dataPenjualan;
         $(document).ready(function() {
-            dataPenjualan = $('#table_penjualan').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    "url": "{{ url('penjualan/list') }}",
-                    "dataType": "json",
-                    "type": "POST",
-                    "data": function(d) {
-                        d.user_id = $('#user_id').val();
-                    }
-                },
-                columns: [
-                    {
+    dataPenjualan = $('#table_penjualan').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            "url": "{{ url('penjualan/list') }}",
+            "dataType": "json",
+            "type": "POST",
+            "data": function(d) {
+                d.user_id = $('#user_id').val();
+            }
+        },
+        columns: [
+            {
                 data: "DT_RowIndex",
                 className: "text-center",
                 width: "5%",
@@ -104,13 +105,19 @@
                 searchable: true
             },
             {
+                data: "total_harga",
+                width: "15%",
+                orderable: false,
+                searchable: false
+            },
+            {
                 data: "aksi",
                 width: "20%",
                 orderable: false,
                 searchable: false
             }
-                ]
-            });
-        });
+        ]
+    });
+});
     </script>
 @endpush

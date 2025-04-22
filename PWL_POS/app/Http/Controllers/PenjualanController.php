@@ -41,9 +41,14 @@ class PenjualanController extends Controller
         'penjualan_kode',
         'penjualan_tanggal'
     );
-
+   
     return DataTables::of($penjualan)
         ->addIndexColumn()
+        ->addColumn('total_harga', function ($penjualan) {
+            return 'Rp ' . number_format($penjualan->penjualanDetail->sum(function($item) {
+                return $item->harga * $item->jumlah;
+            }), 2, ',', '.');
+        })
         ->addColumn('user', function ($penjualan) { // Tambahkan kolom user
             return $penjualan->user ? $penjualan->user->username : '-';
         })

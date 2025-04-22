@@ -28,4 +28,9 @@ class PenjualanModel extends Model
     public function penjualanDetail(): HasMany {
         return $this->hasMany(PenjualanDetailModel::class, 'penjualan_id', 'penjualan_id');
     }
+
+    public function detail()
+{
+    return $this->hasMany(PenjualanDetailModel::class, 'penjualan_id', 'penjualan_id');
+}
 }
