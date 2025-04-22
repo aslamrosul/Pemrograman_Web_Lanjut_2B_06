@@ -75,31 +75,37 @@
                     {
                 data: "DT_RowIndex",
                 className: "text-center",
+                width: "5%",
                 orderable: false,
                 searchable: false
             },
             {
                 data: "penjualan_kode",
+                width: "13%",
                 orderable: true,
                 searchable: true
             },
             {
                 data: "pembeli",
+                width: "13%",
                 orderable: true,
                 searchable: true
             },
             {
                 data: "user",
+                width: "13%",
                 orderable: false,
                 searchable: true
             },
             {
                 data: "penjualan_tanggal",
+                width: "13%",
                 orderable: true,
                 searchable: true
             },
             {
                 data: "aksi",
+                width: "20%",
                 orderable: false,
                 searchable: false
             }

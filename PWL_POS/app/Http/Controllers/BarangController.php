@@ -59,6 +59,9 @@ class BarangController extends Controller
 
         return DataTables::of($barang)
             ->addIndexColumn()
+            ->addColumn('stok', function($barang) {
+                return $barang->barang_stok; // Menggunakan accessor
+            })
             ->addColumn('aksi', function ($barang) { // menambahkan kolom aksi
                 // $btn = '<a href="' . url('/barang/' . $barang->barang_id) . '" class="btn btn-info btn-sm">Detail</a>';
                 // $btn .= '<a href="' . url('/barang/' . $barang->barang_id . '/edit') . '" class="btn btn-warning btn-sm">Edit</a>';

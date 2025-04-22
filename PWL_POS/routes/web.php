@@ -31,13 +31,14 @@ Route::middleware(['auth'])->group(function () { //artinya semua route di dalam 
     // Route Level
 
     Route::middleware(['authorize:ADM,MNG,STF,KSR,SPV'])->group(function () {
-        Route::middleware(['authorize:ADM,MNG,STF,KSR,SPV'])->group(function () {
-            Route::get('/profile', [ProfileController::class, 'profil'])->name('profil');  
-            Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-            Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
-        });        
+        Route::get('/penjualan/{id}/receipt_pdf', [PenjualanController::class, 'export_receipt'])->name('penjualan.receipt');
     });
-
+    
+    Route::middleware(['authorize:ADM,MNG,STF,KSR,SPV'])->group(function () {
+        Route::get('/profile', [ProfileController::class, 'profil'])->name('profil');  
+        Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    });        
     // Artinya semua role di dalam group ini harus punya rle ADM (Administrator)
     Route::middleware(['authorize:ADM'])->group(function () {
         Route::group(['prefix' => 'level'], function () {

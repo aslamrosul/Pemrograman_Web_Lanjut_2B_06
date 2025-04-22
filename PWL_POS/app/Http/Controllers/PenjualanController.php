@@ -60,6 +60,7 @@ class PenjualanController extends Controller
             '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
         $btn .= '<button onclick="modalAction(\'' . url('/penjualan/' . $penjualan->penjualan_id .
             '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Hapus</button> ';
+            $btn .= '<a href="' . url('/penjualan/' . $penjualan->penjualan_id . '/receipt_pdf') . '" class="btn btn-sm btn-success mr-1">Cetak Struk</a>';
         return $btn;
             
         })
@@ -210,9 +211,18 @@ public function destroy(string $id)
 
 public function create_ajax()
 {
+   
     $users = UserModel::all();
-    $barangs = BarangModel::all();
-    return view('penjualan.create_ajax')->with(['users' => $users, 'barangs' => $barangs]);
+    $barangs = BarangModel::with('stoks')->get()->map(function(BarangModel $item) {
+        $item->barang_stok = $item->stoks->sum('stok_jumlah');
+        return $item;
+    });
+
+    return view('penjualan.create_ajax')->with([
+        'users' => $users,
+        'barangs' => $barangs
+    ]);
+
 }
 
 public function store_ajax(Request $request)
