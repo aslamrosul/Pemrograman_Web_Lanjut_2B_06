@@ -52,10 +52,15 @@
 </div>
 
 <script>
+    var barangs = @json($barangs);
+</script>
+
+<script>
 $(document).ready(function(){
     var barangs = @json($barangs);
     var detailIndex = 0;
 
+    
     function addDetailRow(){
         let row = `<tr data-index="${detailIndex}">
             <td>
@@ -63,7 +68,7 @@ $(document).ready(function(){
                     <option value="">- Pilih Barang -</option>`;
         $.each(barangs, function(i, barang){
             row += `<option value="${barang.barang_id}" data-harga="${barang.harga_jual}" data-stok="${barang.barang_stok ?? 0}">
-                        ${barang.barang_nama} (Rp. ${Number(barang.harga_jual).toLocaleString()})
+                        ${barang.barang_nama} (Stok: ${barang.barang_stok ?? 0})
                     </option>`;
         });
         row += `</select>

@@ -217,7 +217,14 @@ public function destroy(string $id)
 public function create_ajax()
 {
     $users = UserModel::all();
-    $barangs = BarangModel::all();
+    $barangs = BarangModel::all()->map(function($barang) {
+        return [
+            'barang_id' => $barang->barang_id,
+            'barang_nama' => $barang->barang_nama,
+            'harga_jual' => $barang->harga_jual,
+            'barang_stok' => $barang->barang_stok, // Panggil accessor di sini
+        ];
+    });
     return view('penjualan.create_ajax')->with(['users' => $users, 'barangs' => $barangs]);
 }
 
