@@ -216,18 +216,9 @@ public function destroy(string $id)
 
 public function create_ajax()
 {
-   
     $users = UserModel::all();
-    $barangs = BarangModel::with('stoks')->get()->map(function(BarangModel $item) {
-        $item->barang_stok = $item->stoks->sum('stok_jumlah');
-        return $item;
-    });
-
-    return view('penjualan.create_ajax')->with([
-        'users' => $users,
-        'barangs' => $barangs
-    ]);
-
+    $barangs = BarangModel::all();
+    return view('penjualan.create_ajax')->with(['users' => $users, 'barangs' => $barangs]);
 }
 
 public function store_ajax(Request $request)
