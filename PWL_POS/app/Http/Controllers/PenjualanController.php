@@ -446,7 +446,11 @@ public function show_ajax($id)
 
     $penjualanDetail = $penjualan->penjualanDetail;
 
-    return view('penjualan.show_ajax', ['penjualanDetail' => $penjualanDetail]);
+    $totalHarga = $penjualan->penjualanDetail->sum(function($item) {
+        return $item->harga * $item->jumlah;
+    });
+
+    return view('penjualan.show_ajax', ['penjualanDetail' => $penjualanDetail, 'totalHarga' => $totalHarga]);
 }
 
 public function confirm_ajax($id)
