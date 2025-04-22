@@ -19,15 +19,14 @@
                     @enderror
                 </div>
             </div>
-
             <div class="form-group row">
                 <label class="col-2">ID User</label>
                 <div class="col-10">
                     <select class="form-control" name="user_id" required>
                         <option value="">- Pilih User -</option>
-                        @foreach($user as $usr)
-                            <option value="{{ $usr->user_id }}" {{ $penjualan->user_id == $usr->user_id ? 'selected' : '' }}>
-                                {{ $usr->nama }}
+                        @foreach($users as $user)
+                            <option value="{{ $user->user_id }}" {{ $penjualan->user_id == $user->user_id ? 'selected' : '' }}>
+                                {{ $user->nama }}
                             </option>
                         @endforeach
                     </select>
@@ -36,7 +35,7 @@
                     @enderror
                 </div>
             </div>
-
+            
             <div class="form-group row">
                 <label class="col-2 control-label col-form-label">Pembeli</label>
                 <div class="col-10">
@@ -58,46 +57,6 @@
             </div>
 
             <div class="form-group row">
-                <label class="col-2 control-label col-form-label">Barang</label>
-                <div class="col-10">
-                    @foreach($barang as $brg)
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="barang_id[]" value="{{ $brg->barang_id }}" 
-                            {{ in_array($brg->barang_id, $penjualan->details->pluck('barang_id')->toArray()) ? 'checked' : '' }}>
-                            <label class="form-check-label">{{ $brg->barang_nama }}</label>
-                        </div>
-                    @endforeach
-                    @error('barang_id')
-                        <small class="form-text text-danger">{{ $message }}</small>
-                    @enderror
-                </div>
-            </div>
-
-            <div class="form-group row">
-                <label class="col-2 control-label col-form-label">Jumlah</label>
-                <div class="col-10">
-                    @foreach($penjualan->details as $index => $detail)
-                        <input type="number" class="form-control mb-2" name="jumlah[]" value="{{ old('jumlah.'.$index, $detail->jumlah) }}" required>
-                    @endforeach
-                    @error('jumlah')
-                        <small class="form-text text-danger">{{ $message }}</small>
-                    @enderror
-                </div>
-            </div>
-
-            <div class="form-group row">
-                <label class="col-2 control-label col-form-label">Harga</label>
-                <div class="col-10">
-                    @foreach($penjualan->details as $index => $detail)
-                        <input type="number" class="form-control mb-2" name="harga[]" value="{{ old('harga.'.$index, $detail->harga) }}" required>
-                    @endforeach
-                    @error('harga')
-                        <small class="form-text text-danger">{{ $message }}</small>
-                    @enderror
-                </div>
-            </div>
-
-            <div class="form-group row">
                 <div class="col-10 offset-2">
                     <button type="submit" class="btn btn-primary btn-sm">Simpan</button>
                     <a class="btn btn-sm btn-default ml-1" href="{{ url('penjualan') }}">Kembali</a>
@@ -107,7 +66,3 @@
     </div>
 </div>
 @endsection
-@push('css')
-@endpush
-@push('js')
-@endpush

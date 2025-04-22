@@ -34,7 +34,7 @@
                     <table class="table table-sm table-bordered table-striped">
                         <tr>
                             <th class="text-right col-3">Supplier :</th>
-                            <td class="col-9">{{ $stok->supplier->supplier_nama }}</td>
+                            <td class="col-9">{{ $stok->supplier->supplier_nama  ?? 'Terjual'}}</td>
                         </tr>
                         <tr>
                             <th class="text-right col-3">Barang :</th>

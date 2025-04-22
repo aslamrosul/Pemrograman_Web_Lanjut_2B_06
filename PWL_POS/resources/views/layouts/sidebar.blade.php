@@ -69,6 +69,13 @@
                     <p>Stok Barang</p>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{ url('/penjualan') }}"
+                    class="nav-link {{ $activeMenu == 'penjualan' ? 'active' : '' }}">
+                    <i class="nav-icon fas fa-cash-register" style="opacity: 0.6;"></i>
+                    <p>Data Penjualan</p>
+                </a>
+            </li>
            
             <li class="nav-header">Data Supplier</li>
             <li class="nav-item">
