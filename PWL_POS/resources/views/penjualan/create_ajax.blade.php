@@ -1,4 +1,4 @@
-<div class="modal-dialog modal-lg" role="document">
+<div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
         <form action="{{ url('penjualan/ajax') }}" method="POST" id="form-tambah">
             @csrf
@@ -6,7 +6,7 @@
             <div class="modal-header">
                 <h5 class="modal-title">Tambah Penjualan Beserta Detailnya</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                   <span aria-hidden="true">&times;</span>
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
 
@@ -29,11 +29,11 @@
                 <table class="table" id="detailTable">
                     <thead>
                         <tr>
-                            <th>Barang</th>
-                            <th>Stok Tersedia</th>
-                            <th>Jumlah</th>
-                            <th>Harga (Otomatis)</th>
-                            <th>Aksi</th>
+                            <th class="col-6">Barang</th>
+                            <th class="col-1">Stok Tersedia</th>
+                            <th class="col-1">Jumlah</th>
+                            <th class="col-2">Harga (Otomatis)</th>
+                            <th class="col-1">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -55,23 +55,26 @@
     var barangs = @json($barangs);
 </script>
 
-<script>
-$(document).ready(function(){
-    var barangs = @json($barangs);
-    var detailIndex = 0;
 
-    
-    function addDetailRow(){
-        let row = `<tr data-index="${detailIndex}">
+
+<script>
+
+    $(document).ready(function () {
+        var barangs = @json($barangs);
+        var detailIndex = 0;
+
+
+        function addDetailRow() {
+            let row = `<tr data-index="${detailIndex}">
             <td>
                 <select name="details[${detailIndex}][barang_id]" class="form-control barang-select" required>
                     <option value="">- Pilih Barang -</option>`;
-        $.each(barangs, function(i, barang){
-            row += `<option value="${barang.barang_id}" data-harga="${barang.harga_jual}" data-stok="${barang.barang_stok ?? 0}">
+            $.each(barangs, function (i, barang) {
+                row += `<option value="${barang.barang_id}" data-harga="${barang.harga_jual}" data-stok="${barang.barang_stok ?? 0}">
                         ${barang.barang_nama} (Stok: ${barang.barang_stok ?? 0})
                     </option>`;
-        });
-        row += `</select>
+            });
+            row += `</select>
                 <small class="error-text form-text text-danger" id="error-details_${detailIndex}_barang_id"></small>
             </td>
             <td>
@@ -89,87 +92,100 @@ $(document).ready(function(){
                 <button type="button" class="btn btn-danger removeDetail">Hapus</button>
             </td>
         </tr>`;
-        $('#detailTable tbody').append(row);
-        detailIndex++;
-    }
-
-    $('#addDetail').on('click', function(){
-        addDetailRow();
-    });
-
-    $('#detailTable').on('change', '.barang-select', function(){
-        var selectedOption = $(this).find(':selected');
-        var stok = selectedOption.data('stok') || 0;
-        var harga = parseFloat(selectedOption.data('harga')) || 0;
-        var row = $(this).closest('tr');
-        row.find('.stok-text').text(stok);
-
-        var jumlah = parseFloat(row.find('.jumlah-input').val()) || 0;
-        row.find('.harga-input').val(harga * jumlah);
-    });
-
-    $('#detailTable').on('input', '.jumlah-input', function(){
-        var jumlah = parseFloat($(this).val()) || 0;
-        var row = $(this).closest('tr');
-        var selectedOption = row.find('.barang-select').find(':selected');
-        var harga = parseFloat(selectedOption.data('harga')) || 0;
-        row.find('.harga-input').val(harga * jumlah);
-    });
-
-    $('#detailTable').on('click', '.removeDetail', function(){
-        $(this).closest('tr').remove();
-    });
-
-    $("#form-tambah").validate({
-        rules: {
-            user_id: { required: true, number: true },
-            pembeli: { required: true, minlength: 3, maxlength: 100 },
-            penjualan_kode: { required: true, minlength: 3, maxlength: 20 },
-            penjualan_tanggal: { required: true, date: true }
-        },
-        submitHandler: function(form) {
-            $.ajax({
-                url: form.action,
-                type: form.method,
-                data: $(form).serialize(),
-                success: function(response) {
-                    if (response.status) {
-                        $('#myModal').modal('hide');
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil',
-                            text: response.message
-                        });
-                        if (typeof dataPenjualan !== 'undefined') {
-                            dataPenjualan.ajax.reload();
-                        }
-                    } else {
-                        $(".error-text").text("");
-                        $.each(response.msgField, function(prefix, val) {
-                            $("#error-" + prefix).text(val[0]);
-                        });
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Terjadi Kesalahan',
-                            text: response.message
-                        });
-                    }
-                }
-            });
-            return false;
-        },
-        errorElement: 'span',
-        errorPlacement: function(error, element) {
-            error.addClass('invalid-feedback');
-            element.closest('.form-group').append(error);
-        },
-        highlight: function(element) {
-            $(element).addClass('is-invalid');
-        },
-        unhighlight: function(element) {
-            $(element).removeClass('is-invalid');
+            $('#detailTable tbody').append(row);
+            detailIndex++;
         }
-    });
 
-});
+        $('#addDetail').on('click', function () {
+            addDetailRow();
+        });
+
+        function formatRupiah(angka) {
+            var number_string = angka.toString(),
+                sisa = number_string.length % 3,
+                rupiah = number_string.substr(0, sisa),
+                ribuan = number_string.substr(sisa).match(/\d{3}/g);
+
+            if (ribuan) {
+                separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
+            }
+            return 'Rp' + rupiah;
+        }
+
+        $('#detailTable').on('change', '.barang-select', function () {
+            var selectedOption = $(this).find(':selected');
+            var stok = selectedOption.data('stok') || 0;
+            var harga = parseFloat(selectedOption.data('harga')) || 0;
+            var row = $(this).closest('tr');
+            row.find('.stok-text').text(stok);
+
+            var jumlah = parseFloat(row.find('.jumlah-input').val()) || 0;
+            row.find('.harga-input').val(formatRupiah(harga * jumlah));
+        });
+
+        $('#detailTable').on('input', '.jumlah-input', function () {
+            var jumlah = parseFloat($(this).val()) || 0;
+            var row = $(this).closest('tr');
+            var selectedOption = row.find('.barang-select').find(':selected');
+            var harga = parseFloat(selectedOption.data('harga')) || 0;
+            row.find('.harga-input').val(formatRupiah(harga * jumlah));
+        });
+
+        $('#detailTable').on('click', '.removeDetail', function () {
+            $(this).closest('tr').remove();
+        });
+
+        $("#form-tambah").validate({
+            rules: {
+                user_id: { required: true, number: true },
+                pembeli: { required: true, minlength: 3, maxlength: 100 },
+                penjualan_kode: { required: true, minlength: 3, maxlength: 20 },
+                penjualan_tanggal: { required: true, date: true }
+            },
+            submitHandler: function (form) {
+                $.ajax({
+                    url: form.action,
+                    type: form.method,
+                    data: $(form).serialize(),
+                    success: function (response) {
+                        if (response.status) {
+                            $('#myModal').modal('hide');
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil',
+                                text: response.message
+                            });
+                            if (typeof dataPenjualan !== 'undefined') {
+                                dataPenjualan.ajax.reload();
+                            }
+                        } else {
+                            $(".error-text").text("");
+                            $.each(response.msgField, function (prefix, val) {
+                                $("#error-" + prefix).text(val[0]);
+                            });
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Terjadi Kesalahan',
+                                text: response.message
+                            });
+                        }
+                    }
+                });
+                return false;
+            },
+            errorElement: 'span',
+            errorPlacement: function (error, element) {
+                error.addClass('invalid-feedback');
+                element.closest('.form-group').append(error);
+            },
+            highlight: function (element) {
+                $(element).addClass('is-invalid');
+            },
+            unhighlight: function (element) {
+                $(element).removeClass('is-invalid');
+            }
+        });
+
+    });
 </script>
