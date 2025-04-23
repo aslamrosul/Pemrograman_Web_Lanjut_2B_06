@@ -27,7 +27,7 @@ Route::get('logout', [AuthController::class, 'logout'])->middleware('auth');
 Route::middleware(['auth'])->group(function () { //artinya semua route di dalam goup ini harus login dulu
     // masukkan semua route yang perlu autentikasi di sini
 
-    Route::get('/', [DashboardController::class, 'index']);
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     // Route Level
 
     Route::middleware(['authorize:ADM,MNG,STF,KSR,SPV'])->group(function () {
@@ -66,7 +66,7 @@ Route::middleware(['auth'])->group(function () { //artinya semua route di dalam 
 
     Route::middleware(['authorize:ADM'])->group(function () {
         Route::group(['prefix' => 'user'], function () {
-            Route::get('/', [UserController::class, 'index']); // menampilkan halaman awal user
+            Route::get('/', [UserController::class, 'index'])->name('user.index'); // menampilkan halaman awal user
             Route::post('/list', [UserController::class, 'list']); // menampilkan data user dalam bentuk json untuk datatable
             Route::get('/create', [UserController::class, 'create']); // menampilkan halaman form tambah user
             Route::post('/', [UserController::class, 'store']); // menyimpan data user baru
@@ -90,7 +90,7 @@ Route::middleware(['auth'])->group(function () { //artinya semua route di dalam 
 
     Route::middleware(['authorize:ADM,MNG'])->group(function () {
         Route::group(['prefix' => 'kategori'], function () {
-            Route::get('/', [KategoriController::class, 'index']); // menampilkan halaman awal Kategori
+            Route::get('/', [KategoriController::class, 'index'])->name('kategori.index'); // menampilkan halaman awal Kategori
             Route::post('/list', [KategoriController::class, 'list']); // menampilkan data Kategori dalam bentuk json untuk datatable
             Route::get('/create', [KategoriController::class, 'create']); // menampilkan halaman form tambah Kategori
             Route::post('/', [KategoriController::class, 'store']); // menyimpan data Kategori baru
@@ -114,7 +114,7 @@ Route::middleware(['auth'])->group(function () { //artinya semua route di dalam 
 
     Route::middleware(['authorize:ADM,MNG,STF'])->group(function () {
         Route::group(['prefix' => 'barang'], function () {
-            Route::get('/', [BarangController::class, 'index']); // menampilkan halaman awal Barang
+            Route::get('/', [BarangController::class, 'index'])->name('barang.index'); // menampilkan halaman awal Barang
             Route::post('/list', [BarangController::class, 'list']); // menampilkan data Barang dalam bentuk json untuk datatable
             Route::get('/create', [BarangController::class, 'create']); // menampilkan halaman form tambah Barang
             Route::post('/', [BarangController::class, 'store']); // menyimpan data Barang baru
@@ -187,7 +187,7 @@ Route::middleware(['auth'])->group(function () { //artinya semua route di dalam 
     });
     Route::middleware(['authorize:ADM,MNG,STF'])->group(function () {
         Route::group(['prefix' => 'penjualan'], function () {
-            Route::get('/', [PenjualanController::class, 'index']); // menampilkan halaman awal Penjualan
+            Route::get('/', [PenjualanController::class, 'index'])->name('penjualan.index'); // menampilkan halaman awal Penjualan
             Route::post('/list', [PenjualanController::class, 'list']); // menampilkan data Penjualan dalam bentuk json untuk datatable
             Route::get('/create', [PenjualanController::class, 'create']); // menampilkan halaman form tambah Penjualan
             Route::post('/', [PenjualanController::class, 'store']); // menyimpan data Penjualan baru
