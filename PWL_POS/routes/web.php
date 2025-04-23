@@ -6,7 +6,7 @@ use App\Http\Controllers\StokController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LevelController;
 use App\Http\Controllers\BarangController;
-use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\PenjualanController;
 use App\Http\Controllers\ProfileController;
@@ -27,7 +27,7 @@ Route::get('logout', [AuthController::class, 'logout'])->middleware('auth');
 Route::middleware(['auth'])->group(function () { //artinya semua route di dalam goup ini harus login dulu
     // masukkan semua route yang perlu autentikasi di sini
 
-    Route::get('/', [WelcomeController::class, 'index']);
+    Route::get('/', [DashboardController::class, 'index']);
     // Route Level
 
     Route::middleware(['authorize:ADM,MNG,STF,KSR,SPV'])->group(function () {
