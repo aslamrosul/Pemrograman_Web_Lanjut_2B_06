@@ -39,16 +39,6 @@
                     <input type="datetime-local" name="stok_tanggal" id="stok_tanggal" class="form-control" required>
                     <small id="error-stok_tanggal" class="error-text form-text text-danger"></small>
                 </div>
-                <div class="form-group">
-                    <label>Diinput Oleh</label>
-                    <select name="user_id" id="user_id" class="form-control" required>
-                        <option value="">- Pilih User -</option>
-                        @foreach($user as $u)
-                            <option value="{{ $u->user_id }}">{{ $u->username }}</option>
-                        @endforeach
-                    </select>
-                    <small id="error-user_id" class="error-text form-text text-danger"></small>
-                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-warning">Batal</button>
@@ -60,13 +50,28 @@
 
 <script>
     $(document).ready(function () {
+
+        // Format the current datetime for the input field (fallback if server-side doesn't work)
+        function getCurrentDateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        // Set default datetime (client-side fallback)
+        $('#stok_tanggal').val(getCurrentDateTime());
+
         $("#form-tambah").validate({
             rules: {
                 supplier_id: { required: true, number: true },
                 barang_id: { required: true, number: true },
                 stok_jumlah: { required: true, min: 1 },
                 stok_tanggal: { required: true, date: true },
-                user_id: { required: true, number: true }
             },
             submitHandler: function (form) {
                 $.ajax({

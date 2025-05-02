@@ -217,9 +217,8 @@ class StokController extends Controller
     {
         $barang = BarangModel::select('barang_id', 'barang_nama')->get();
         $supplier = SupplierModel::select('supplier_id', 'supplier_nama')->get();
-        $user = UserModel::select('user_id', 'username')->get();
 
-        return view('stok.create_ajax', compact('barang', 'supplier', 'user'));
+        return view('stok.create_ajax', compact('barang', 'supplier'));
     }
 
     public function store_ajax(Request $request)
@@ -228,7 +227,6 @@ class StokController extends Controller
             $rules = [
                 'supplier_id' => 'required|integer',
                 'barang_id'   => 'required|integer',
-                'user_id'     => 'required|integer',
                 'stok_tanggal' => 'required|date',
                 'stok_jumlah' => 'required|integer|min:1'
             ];
@@ -240,25 +238,45 @@ class StokController extends Controller
                     'status' => false,
                     'message' => 'Validasi Gagal',
                     'msgField' => $validator->errors(),
-                ]);
+                ], 422);
             }
 
-            StokModel::create($request->all());
+            // Create data with authenticated user
+            $stokData = $request->only(['supplier_id', 'barang_id', 'stok_tanggal', 'stok_jumlah']);
+            $stokData['user_id'] = auth()->id(); // Automatically set current user
+
+            DB::transaction(function () use ($stokData) {
+                StokModel::create($stokData);
+
+                // Optional: Update barang's current stock if you maintain a stock column
+                // BarangModel::where('barang_id', $stokData['barang_id'])
+                //     ->increment('stok', $stokData['stok_jumlah']);
+            });
+
             return response()->json([
                 'status' => true,
                 'message' => 'Data stok berhasil disimpan'
-            ]);
+            ], 201);
         }
     }
 
     public function edit_ajax(string $id)
     {
         $stok = StokModel::find($id);
+
+        if (!$stok) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Data stok tidak ditemukan'
+            ]);
+        }
+
         $barang = BarangModel::select('barang_id', 'barang_nama')->get();
         $supplier = SupplierModel::select('supplier_id', 'supplier_nama')->get();
-        $user = UserModel::select('user_id', 'username')->get();
-        return view('stok.edit_ajax', compact('stok', 'barang', 'supplier', 'user'));
+
+        return view('stok.edit_ajax', compact('stok', 'barang', 'supplier'));
     }
+
 
     public function update_ajax(Request $request, $id)
     {
@@ -266,7 +284,6 @@ class StokController extends Controller
             $rules = [
                 'supplier_id' => 'required|integer',
                 'barang_id'   => 'required|integer',
-                'user_id'     => 'required|integer',
                 'stok_tanggal' => 'required|date',
                 'stok_jumlah' => 'required|integer|min:1'
             ];
@@ -282,18 +299,23 @@ class StokController extends Controller
             }
 
             $stok = StokModel::find($id);
-            if ($stok) {
-                $stok->update($request->all());
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Data berhasil diupdate'
-                ]);
-            } else {
+            if (!$stok) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Data tidak ditemukan'
                 ]);
             }
+
+            // Get all request data and set current user
+            $data = $request->all();
+            $data['user_id'] = auth()->id();
+
+            $stok->update($data);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Data berhasil diupdate'
+            ]);
         }
     }
     public function show_ajax($id)
@@ -363,6 +385,9 @@ class StokController extends Controller
             $data = $sheet->toArray(null, false, true, true);
             $insert = [];
 
+            // Dapatkan ID user yang sedang login
+            $userId = auth()->id();
+
             // Proses data, baris pertama dianggap header
             if (count($data) > 1) {
                 foreach ($data as $baris => $value) {
@@ -370,9 +395,9 @@ class StokController extends Controller
                         $insert[] = [
                             'supplier_id' => $value['A'],
                             'barang_id'   => $value['B'],
-                            'user_id'     => $value['C'],
-                            'stok_tanggal' => \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value['D']),
-                            'stok_jumlah' => $value['E'],
+                            'user_id'     => $userId,
+                            'stok_tanggal' => \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value['C']),
+                            'stok_jumlah' => $value['D'],
                             'created_at'  => now(),
                             'updated_at'  => now(),
                         ];
@@ -412,45 +437,45 @@ class StokController extends Controller
             ->orderBy('stok_id')
             ->with(['barang', 'user', 'supplier'])
             ->get();
-    
+
         //load library excel
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet(); //ambil sheet aktif
-    
+
         $sheet->setCellValue('A1', 'No');
         $sheet->setCellValue('B1', 'Nama Barang');
         $sheet->setCellValue('C1', 'Nama User');
         $sheet->setCellValue('D1', 'Nama Supplier');
         $sheet->setCellValue('E1', 'Tanggal Masuk');
         $sheet->setCellValue('F1', 'Jumlah Stok');
-    
+
         $sheet->getStyle('A1:F1')->getFont()->setBold(true); // Set header bold
-    
+
         $no = 1; //Nomor value dimulai dari 1
         $baris = 2; //Baris value dimulai dari 2
         foreach ($stok as $key => $value) {
             $sheet->setCellValue('A' . $baris, $no);
             $sheet->setCellValue('B' . $baris, $value->barang->barang_nama);
             $sheet->setCellValue('C' . $baris, $value->user->nama);
-            
+
             // Cek jika supplier null, tampilkan 'Terjual'
             $supplierName = $value->supplier_id ? $value->supplier->supplier_nama : 'Terjual';
             $sheet->setCellValue('D' . $baris, $supplierName);
-            
+
             $sheet->setCellValue('E' . $baris, $value->stok_tanggal);
             $sheet->setCellValue('F' . $baris, $value->stok_jumlah);
             $no++;
             $baris++;
         }
-    
+
         foreach (range('A', 'F') as $columnID) {
             $sheet->getColumnDimension($columnID)->setAutoSize(true); //set auto size untuk kolom
         }
-    
+
         $sheet->setTitle('Data Stock Barang'); //set judul sheet
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx'); //set writer
         $filename = 'Data_Stock_Barang_' . date('Y-m-d_H-i-s') . '.xlsx'; //set nama file
-    
+
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         header('Cache-Control: max-age=0');
@@ -459,12 +484,12 @@ class StokController extends Controller
         header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
         header('Cache-Control: cache, must-revalidate');
         header('Pragma: public');
-    
+
         $writer->save('php://output'); //simpan file ke output
         exit; //keluar dari script
     }
 
-    
+
 
     public function export_pdf()
     {

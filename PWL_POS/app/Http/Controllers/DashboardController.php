@@ -27,8 +27,11 @@ class DashboardController extends Controller
         // Hitung total pendapatan dari semua penjualan
         $totalRevenue = PenjualanDetailModel::with('barang')
             ->get()
+            // ->sum(function($detail) {
+            //     return $detail->jumlah * $detail->harga;
+            // });
             ->sum(function($detail) {
-                return $detail->jumlah * $detail->harga;
+                return  $detail->harga* $detail->jumlah;
             });
 
         return view('dashboard', [

@@ -65,8 +65,10 @@
                         <tr>
                             <th>ID Detail</th>
                             <th>Nama Barang</th>
-                            <th>Jumlah</th>
                             <th>Harga</th>
+                            <th>Jumlah</th>
+                            <th>Sub Total</th>
+                            
                         </tr>
                     </thead>
                     <tbody>
@@ -74,14 +76,15 @@
                         <tr>
                             <td>{{ $detail->detail_id }}</td>
                             <td>{{ $detail->barang->barang_nama }}</td>
-                            <td>{{ $detail->jumlah }}</td>
                             <td>{{ 'Rp' . number_format($detail->harga, 0, ',', '.') }}</td>
+                            <td>{{ $detail->jumlah }}</td>
+                            <td>{{ 'Rp' . number_format($detail->harga * $detail->jumlah, 0, ',', '.') }}</td>
                         </tr>
                         @endforeach
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th colspan="3" class="text-end">Total Harga</th>
+                            <th colspan="4" class="text-end">Total Harga</th>
                             <th>{{ 'Rp. ' . number_format($totalHarga, 0, ',', '.') }}</th>
                         </tr>
                     </tfoot>

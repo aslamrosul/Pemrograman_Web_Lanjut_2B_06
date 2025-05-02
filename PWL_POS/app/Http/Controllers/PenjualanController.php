@@ -50,7 +50,6 @@ class PenjualanController extends Controller
             }), 2, ',', '.');
         })
         ->addColumn('user', function ($penjualan) { // Tambahkan kolom user
-            return $penjualan->user ? $penjualan->user->username : '-';
         })
         ->addColumn('aksi', function ($penjualan) {
             // $btn = '<a href="' . url('/penjualan/' . $penjualan->penjualan_id) . '" class="btn btn-info btn-sm">Detail</a>';
@@ -296,14 +295,6 @@ public function store_ajax(Request $request)
                 'harga'        => $detail['harga'],
             ]);
 
-            // Kurangi stok barang berdasarkan jumlah yang dijual
-            StokModel::create([
-                'barang_id'    => $detail['barang_id'],
-                'user_id'      => auth()->id(),
-                'stok_tanggal' => now(),
-                'stok_jumlah'  => -$detail['jumlah'], // stok keluar
-                'supplier_id'  => null, // karena bukan dari supplier
-            ]);
         }
 
         DB::commit();
@@ -355,7 +346,7 @@ public function update_ajax(Request $request, $id)
         'details' => 'required|array|min:1',
         'details.*.barang_id' => 'required|integer|exists:m_barang,barang_id',
         'details.*.jumlah' => 'required|integer|min:1',
-        'details.*.harga' => 'required|numeric|min:0'
+        'details.*.harga' => 'required|numeric|min:0' // This is the unit price
     ];
 
     $validator = Validator::make($request->all(), $rules);
@@ -378,15 +369,11 @@ public function update_ajax(Request $request, $id)
         // Get current details for stock restoration
         $currentDetails = $penjualan->penjualanDetail;
 
-        // Process old details - restore stock
+        // Restore stock from old details
         foreach ($currentDetails as $detail) {
-            StokModel::create([
-                'barang_id' => $detail->barang_id,
-                'user_id' => auth()->id(),
-                'stok_tanggal' => now(),
-                'stok_jumlah' => $detail->jumlah, // return stock
-                'supplier_id' => null
-            ]);
+            $barang = BarangModel::find($detail->barang_id);
+            $barang->barang_stok += $detail->jumlah;
+            $barang->save();
         }
 
         // Delete old details
@@ -397,30 +384,26 @@ public function update_ajax(Request $request, $id)
             $barang = BarangModel::find($detail['barang_id']);
             
             // Check stock availability
-            $stokTersedia = $barang->barang_stok;
-            if ($stokTersedia < $detail['jumlah']) {
+            if ($barang->barang_stok < $detail['jumlah']) {
                 DB::rollBack();
                 return response()->json([
                     'status' => false,
-                    'message' => 'Stok tidak mencukupi untuk barang: ' . $barang->barang_nama
+                    'message' => 'Stok tidak mencukupi untuk barang: ' . $barang->barang_nama . 
+                                '. Stok tersedia: ' . $barang->barang_stok . 
+                                ', jumlah diminta: ' . $detail['jumlah']
                 ]);
             }
+
+            // Update stock
+            $barang->barang_stok -= $detail['jumlah'];
+            $barang->save();
 
             // Create new detail
             PenjualanDetailModel::create([
                 'penjualan_id' => $penjualan->penjualan_id,
                 'barang_id' => $detail['barang_id'],
                 'jumlah' => $detail['jumlah'],
-                'harga' => $detail['harga']
-            ]);
-
-            // Reduce stock
-            StokModel::create([
-                'barang_id' => $detail['barang_id'],
-                'user_id' => auth()->id(),
-                'stok_tanggal' => now(),
-                'stok_jumlah' => -$detail['jumlah'], // reduce stock
-                'supplier_id' => null
+                'harga' => $detail['harga'] // Unit price
             ]);
         }
 
@@ -567,14 +550,6 @@ public function import_ajax(Request $request)
                 'harga'        => $harga,
             ]);
 
-            // Kurangi stok: catat stok keluar di tabel t_stok
-            StokModel::create([
-                'barang_id'    => $barangId,
-                'user_id'      => $userId,
-                'stok_tanggal' => now(),
-                'stok_jumlah'  => -$jumlah,
-                'supplier_id'  => null, // karena ini bukan barang masuk
-            ]);
         }
 
         DB::commit();

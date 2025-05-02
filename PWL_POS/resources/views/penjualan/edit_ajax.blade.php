@@ -66,18 +66,33 @@
                                 </select>
                             </div>
                             <div class="col-md-2">
+                                <label>Harga Satuan</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp</span>
+                                    </div>
+                                    <input type="text" class="form-control harga-satuan" 
+                                           name="details[{{ $index }}][harga]" 
+                                           value="{{ number_format($detail->harga, 0, ',', '.') }}" readonly required>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
                                 <label>Jumlah</label>
                                 <input type="number" class="form-control jumlah" 
                                        name="details[{{ $index }}][jumlah]" 
                                        value="{{ $detail->jumlah }}" min="1" required>
                             </div>
-                            <div class="col-md-3">
-                                <label>Harga</label>
-                                <input type="number" class="form-control harga" 
-                                       name="details[{{ $index }}][harga]" 
-                                       value="{{ $detail->harga }}" readonly required>
-                            </div>
                             <div class="col-md-2">
+                                <label>SubTotal</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp</span>
+                                    </div>
+                                    <input type="text" class="form-control subtotal" 
+                                           value="{{ number_format($detail->harga * $detail->jumlah, 0, ',', '.') }}" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-1">
                                 <label>&nbsp;</label>
                                 <button type="button" class="btn btn-danger btn-block hapus-detail">
                                     <i class="fa fa-trash"></i> Hapus
@@ -108,6 +123,23 @@
             // Initialize detail counter
             let detailCounter = {{ count($penjualan->penjualanDetail) }};
             
+            // Function to format number as Rupiah
+            function formatRupiah(angka) {
+                var number_string = angka.toString(),
+                    split = number_string.split('.'),
+                    sisa = split[0].length % 3,
+                    rupiah = split[0].substr(0, sisa),
+                    ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+                    
+                if (ribuan) {
+                    separator = sisa ? '.' : '';
+                    rupiah += separator + ribuan.join('.');
+                }
+                
+                rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+                return rupiah;
+            }
+            
             // Function to calculate price
             function calculatePrice(element) {
                 const row = $(element).closest('.detail-item');
@@ -115,7 +147,8 @@
                 const quantity = parseInt(row.find('.jumlah').val()) || 0;
                 const totalPrice = pricePerItem * quantity;
                 
-                row.find('.harga').val(totalPrice.toFixed(2));
+                row.find('.harga-satuan').val(formatRupiah(pricePerItem));
+                row.find('.subtotal').val(formatRupiah(totalPrice));
             }
         
             // Add detail item
@@ -135,14 +168,28 @@
                             </select>
                         </div>
                         <div class="col-md-2">
+                            <label>Harga Satuan</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Rp</span>
+                                </div>
+                                <input type="text" class="form-control harga-satuan" name="details[${index}][harga]" readonly required>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
                             <label>Jumlah</label>
                             <input type="number" class="form-control jumlah" name="details[${index}][jumlah]" min="1" value="1" required>
                         </div>
-                        <div class="col-md-3">
-                            <label>Harga</label>
-                            <input type="number" class="form-control harga" name="details[${index}][harga]" readonly required>
-                        </div>
                         <div class="col-md-2">
+                            <label>SubTotal</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Rp</span>
+                                </div>
+                                <input type="text" class="form-control subtotal" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-1">
                             <label>&nbsp;</label>
                             <button type="button" class="btn btn-danger btn-block hapus-detail">
                                 <i class="fa fa-trash"></i> Hapus
@@ -164,6 +211,9 @@
         
             // Update price when item or quantity changes
             $(document).on('change', '.barang-select', function() {
+                const row = $(this).closest('.detail-item');
+                const pricePerItem = parseFloat($(this).find('option:selected').data('harga')) || 0;
+                row.find('.harga-satuan').val(formatRupiah(pricePerItem));
                 calculatePrice(this);
             });
         
@@ -185,6 +235,12 @@
                     }
                 },
                 submitHandler: function(form) {
+                    // Convert Rupiah format back to number before submit
+                    $('.harga-satuan').each(function() {
+                        let value = $(this).val().replace(/\./g, '');
+                        $(this).val(value);
+                    });
+                    
                     $.ajax({
                         url: $(form).attr('action'),
                         type: 'POST',
@@ -218,5 +274,5 @@
                 }
             });
         });
-        </script>
+    </script>
 @endempty

@@ -16,7 +16,7 @@ class BarangModel extends Model
     protected $primaryKey = 'barang_id';
 
     protected $fillable = [
-        'kategori_id',  
+        'kategori_id',
         'barang_kode',
         'barang_nama',
         'harga_beli',
@@ -32,8 +32,18 @@ class BarangModel extends Model
     }
 
     // Tambahkan accessor untuk menghitung stok real-time
-    public function getBarangStokAttribute()
+    // App\Models\BarangModel.php
+    public function getBarangStokAttribute(): int
     {
-        return StokModel::where('barang_id', $this->barang_id)->sum('stok_jumlah');
+        // Total stok masuk (hanya yang positif)
+        $stokMasuk = StokModel::where('barang_id', $this->barang_id)
+            ->where('stok_jumlah', '>', 0)
+            ->sum('stok_jumlah');
+
+        // Total stok keluar (jumlah penjualan)
+        $stokKeluar = PenjualanDetailModel::where('barang_id', $this->barang_id)
+            ->sum('jumlah');
+
+        return $stokMasuk - $stokKeluar;
     }
 }
