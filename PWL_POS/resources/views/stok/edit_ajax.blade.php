@@ -63,17 +63,6 @@
                             class="form-control" required>
                         <small id="error-stok_tanggal" class="error-text form-text text-danger"></small>
                     </div>
-                    <div class="form-group">
-                        <label>Diinput Oleh</label>
-                        <select name="user_id" id="user_id" class="form-control" required>
-                            <option value="">- Pilih User -</option>
-                            @foreach($user as $u)
-                                <option {{ ($u->user_id == $stok->user_id) ? 'selected' : '' }} 
-                                    value="{{ $u->user_id }}">{{ $u->username }}</option>
-                            @endforeach
-                        </select>
-                        <small id="error-user_id" class="error-text form-text text-danger"></small>
-                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" data-dismiss="modal" class="btn btn-warning">Batal</button>
@@ -90,7 +79,6 @@
                     barang_id: { required: true, number: true },
                     stok_jumlah: { required: true, number: true, min: 1 },
                     stok_tanggal: { required: true },
-                    user_id: { required: true, number: true }
                 },
                 submitHandler: function (form) {
                     $.ajax({

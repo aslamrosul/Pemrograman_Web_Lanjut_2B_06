@@ -141,7 +141,7 @@
                     },
                     {
                         // Menampilkan username user (asumsikan relasi: stok -> user)
-                        data: "user.username",
+                        data: "user.nama",
                         orderable: true,
                         searchable: true
                     },
