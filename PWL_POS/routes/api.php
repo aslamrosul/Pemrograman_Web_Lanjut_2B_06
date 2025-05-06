@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\KategoriController;
 use App\Http\Controllers\Api\BarangController;
 use App\Http\Controllers\Api\SupplierController;
 use App\Http\Controllers\Api\LevelController;
+use App\Http\Controllers\Api\RegisterController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -23,6 +24,7 @@ Route::post('/register', App\Http\Controllers\Api\RegisterController::class )->n
 Route::post('/login', App\Http\Controllers\Api\LoginController::class )->name('login');
 Route::post('/logout', App\Http\Controllers\Api\LogoutController::class )->name('logout');
 
+Route::post('/register1', RegisterController::class )->name('register1');
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
