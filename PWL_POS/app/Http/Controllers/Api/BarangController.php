@@ -21,6 +21,8 @@
              'barang_nama' => 'required',
              'harga_beli' => 'required|int',
              'harga_jual' => 'required|int',
+             'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+
             
          ]);
  
@@ -37,6 +39,8 @@
              'barang_nama' => $request->barang_nama,
              'harga_beli' => $request->harga_beli,
              'harga_jual' => $request->harga_jual,
+             'image' => $request->hasFile('image') ? $request->image->hashName() : null,
+
              
          ]);
          //return response JSON barang is created
